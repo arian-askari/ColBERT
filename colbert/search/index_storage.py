@@ -191,7 +191,7 @@ class IndexScorer(IndexLoader, CandidateGeneration):
             D_mask = self.doclens[pids.long()]
 
         if Q.size(0) == 1:
-            return colbert_score_packed(Q, D_packed, D_mask, config), pids
+            return colbert_score_packed(Q, D_packed, D_mask, config), pids # todo: arian first modifying for only single query at the time
 
         D_strided = StridedTensor(D_packed, D_mask, use_gpu=self.use_gpu)
         D_padded, D_lengths = D_strided.as_padded_tensor()
