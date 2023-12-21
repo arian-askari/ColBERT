@@ -20,7 +20,7 @@ TextQueries = Union[str, 'list[str]', 'dict[int, str]', Queries]
 
 
 class Searcher:
-    def __init__(self, index, checkpoint=None, collection=None, config=None):
+    def __init__(self, index, checkpoint=None, collection=None, config=None, scorer_name = None):
         print_memory_stats()
 
         initial_config = ColBERTConfig.from_existing(config, Run().config)
@@ -43,7 +43,7 @@ class Searcher:
         load_index_with_mmap = self.config.load_index_with_mmap
         if load_index_with_mmap and use_gpu:
             raise ValueError(f"Memory-mapped index can only be used with CPU!")
-        self.ranker = IndexScorer(self.index, use_gpu, load_index_with_mmap)
+        self.ranker = IndexScorer(self.index, use_gpu, load_index_with_mmap, scorer_name)
 
         print_memory_stats()
 
