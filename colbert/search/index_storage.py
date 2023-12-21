@@ -201,6 +201,6 @@ class IndexScorer(IndexLoader, CandidateGeneration):
         D_padded, D_lengths = D_strided.as_padded_tensor()
         if self.scorer_name is None:
             return colbert_score(Q, D_padded, D_lengths, config), pids
-        elif self.scorer_name == "BM25":
+        elif self.scorer_name == "25":
             objects_with_more_info = pids # it needs to be computed! for now I just return pids!
             return colbert_score(Q, D_padded, D_lengths, config), pids, objects_with_more_info
