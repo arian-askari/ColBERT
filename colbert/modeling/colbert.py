@@ -199,6 +199,7 @@ def colbert_score_packed(Q, D_packed, D_lengths, config=ColBERTConfig(), scorer_
         if scorer_name is None:
             return colbert_score_reduce(scores_padded, scores_mask, config)
         elif scorer_name == "bm25":
+            print("scores to be returned: ", scores)
             return colbert_score_reduce(scores_padded, scores_mask, config), scores # arian:  it presumably reduces the scores using some strategy (e.g., max-pooling or attention mechanism) based on the padded scores and mask.
     else:
         return ColBERT.segmented_maxsim(scores, D_lengths)
