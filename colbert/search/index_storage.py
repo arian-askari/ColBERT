@@ -194,7 +194,9 @@ class IndexScorer(IndexLoader, CandidateGeneration):
             if self.scorer_name is None:
                 return colbert_score_packed(Q, D_packed, D_mask, config), pids # todo: arian first modifying for only single query at the time
             elif self.scorer_name == "25":
-                packed_score, scores = colbert_score_packed(Q, D_packed, D_mask, config, scorer_name = self.scorer_name)
+                print("colbert_score_packed: ", colbert_score_packed(Q, D_packed, D_mask, config, scorer_name = self.scorer_name))
+                out = colbert_score_packed(Q, D_packed, D_mask, config, scorer_name = self.scorer_name)
+                packed_score, scores = out
                 return packed_score, pids, scores
 
         D_strided = StridedTensor(D_packed, D_mask, use_gpu=self.use_gpu)
