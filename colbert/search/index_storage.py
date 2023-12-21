@@ -18,7 +18,7 @@ import pathlib
 from torch.utils.cpp_extension import load
 
 class IndexScorer(IndexLoader, CandidateGeneration):
-    def __init__(self, index_path, use_gpu=True, load_index_with_mmap=False):
+    def __init__(self, index_path, use_gpu=True, load_index_with_mmap=False, scorer_name = None):
         super().__init__(
             index_path=index_path,
             use_gpu=use_gpu,
@@ -28,6 +28,7 @@ class IndexScorer(IndexLoader, CandidateGeneration):
         IndexScorer.try_load_torch_extensions(use_gpu)
 
         self.set_embeddings_strided()
+        self.scorer_name = scorer_name
 
     @classmethod
     def try_load_torch_extensions(cls, use_gpu):
@@ -84,7 +85,7 @@ class IndexScorer(IndexLoader, CandidateGeneration):
         all_pids = torch.unique(self.emb2pid[embedding_ids.long()].cuda(), sorted=False)
         return all_pids
 
-    def rank(self, config, Q, filter_fn=None, pids=None):
+    def rank(self, config, Q, filter_fn=None, pids=None): # todo arian
         with torch.inference_mode():
             if pids is None:
                 pids, centroid_scores = self.retrieve(config, Q)
@@ -108,7 +109,7 @@ class IndexScorer(IndexLoader, CandidateGeneration):
 
             return pids, scores
 
-    def score_pids(self, config, Q, pids, centroid_scores):
+    def score_pids(self, config, Q, pids, centroid_scores):  # todo arian
         """
             Always supply a flat list or tensor for `pids`.
 
