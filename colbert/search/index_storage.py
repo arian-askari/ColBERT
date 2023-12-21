@@ -101,15 +101,20 @@ class IndexScorer(IndexLoader, CandidateGeneration):
                 pids = filtered_pids
                 if len(pids) == 0:
                     return [], []
+            if self.scorer_name is None:
+                scores, pids = self.score_pids(config, Q, pids, centroid_scores)
+                scores_sorter = scores.sort(descending=True)
+                pids, scores = pids[scores_sorter.indices].tolist(), scores_sorter.values.tolist()
+                return pids, scores
+            elif self.scorer_name == "25":
+                scores, pids, objects_with_more_info = self.score_pids(config, Q, pids, centroid_scores)
+                scores_sorter = scores.sort(descending=True)
+                pids, scores = pids[scores_sorter.indices].tolist(), scores_sorter.values.tolist()
+                return pids, scores, objects_with_more_info
 
-            scores, pids = self.score_pids(config, Q, pids, centroid_scores)
-
-            scores_sorter = scores.sort(descending=True)
-            pids, scores = pids[scores_sorter.indices].tolist(), scores_sorter.values.tolist()
-
-            return pids, scores
-
-    def score_pids(self, config, Q, pids, centroid_scores):  # todo arian
+    def score_pids(self, config, Q, pids, centroid_scores):  # todo arian - return objects_with_more_info if scorer_name is 25
+        # todo 1: first find out where max-sum is calculated then update it...
+        
         """
             Always supply a flat list or tensor for `pids`.
 
@@ -190,5 +195,8 @@ class IndexScorer(IndexLoader, CandidateGeneration):
 
         D_strided = StridedTensor(D_packed, D_mask, use_gpu=self.use_gpu)
         D_padded, D_lengths = D_strided.as_padded_tensor()
-
-        return colbert_score(Q, D_padded, D_lengths, config), pids
+        if self.scorer_name is None:
+            return colbert_score(Q, D_padded, D_lengths, config), pids
+        elif self.scorer_name == "BM25"
+            objects_with_more_info = pids # it needs to be computed! for now I just return pids!
+            return colbert_score(Q, D_padded, D_lengths, config), pids, objects_with_more_info
