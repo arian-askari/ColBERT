@@ -176,7 +176,7 @@ def colbert_score(Q, D_padded, D_mask, config=ColBERTConfig()):
     return colbert_score_reduce(scores, D_mask, config)
 
 
-def colbert_score_packed(Q, D_packed, D_lengths, config=ColBERTConfig()):
+def colbert_score_packed(Q, D_packed, D_lengths, config=ColBERTConfig(), scorer_name = None):
     """
         Works with a single query only.
     """
@@ -186,7 +186,8 @@ def colbert_score_packed(Q, D_packed, D_lengths, config=ColBERTConfig()):
     if use_gpu:
         Q, D_packed, D_lengths = Q.cuda(), D_packed.cuda(), D_lengths.cuda()
 
-    Q = Q.squeeze(0)
+    Q = Q.squeeze(0) # https://pytorch.org/docs/stable/generated/torch.squeeze.html
+    # arian: Q is a 2d matrix of an embedding vector per each token of query (we have single query here)
 
     assert Q.dim() == 2, Q.size()
     assert D_packed.dim() == 2, D_packed.size()
@@ -195,7 +196,9 @@ def colbert_score_packed(Q, D_packed, D_lengths, config=ColBERTConfig()):
 
     if use_gpu or config.interaction == "flipr":
         scores_padded, scores_mask = StridedTensor(scores, D_lengths, use_gpu=use_gpu).as_padded_tensor()
-
-        return colbert_score_reduce(scores_padded, scores_mask, config)
+        if scorer_name is None:
+            return colbert_score_reduce(scores_padded, scores_mask, config)
+        elif scorer_name == "bm25":
+            return colbert_score_reduce(scores_padded, scores_mask, config), scores # arian:  it presumably reduces the scores using some strategy (e.g., max-pooling or attention mechanism) based on the padded scores and mask.
     else:
         return ColBERT.segmented_maxsim(scores, D_lengths)
