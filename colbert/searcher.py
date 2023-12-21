@@ -46,6 +46,7 @@ class Searcher:
         self.ranker = IndexScorer(self.index, use_gpu, load_index_with_mmap, scorer_name)
 
         print_memory_stats()
+        self.scorer_name = scorer_name
 
     def configure(self, **kw_args):
         self.config.configure(**kw_args)
@@ -122,7 +123,12 @@ class Searcher:
                 self.configure(centroid_score_threshold=0.4)
             if self.config.ndocs is None:
                 self.configure(ndocs=max(k * 4, 4096))
-
-        pids, scores = self.ranker.rank(self.config, Q, filter_fn=filter_fn, pids=pids)
-
-        return pids[:k], list(range(1, k+1)), scores[:k]
+        
+        if self.scorer_name is None:
+            pids, scores = self.ranker.rank(self.config, Q, filter_fn=filter_fn, pids=pids)
+            return pids[:k], list(range(1, k+1)), scores[:k]
+        elif self.scorer_name == "25": # todo arian: later I need to remove this part, it is just now for implementing new scoring outside of core library
+            pids, scores, object_with_more_info = self.ranker.rank(self.config, Q, filter_fn=filter_fn, pids=pids)
+            # object_with_more_info: object_with_more_info_to_compute_newscoring_outside_core_code
+            return pids[:k], list(range(1, k+1)), scores[:k], object_with_more_info
+            
